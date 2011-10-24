@@ -1,8 +1,9 @@
-# To change this template, choose Tools | Templates
-# and open the template in the editor.
+from django.shortcuts import render_to_response
+from django.template import RequestContext
+from django.http import HttpResponseRedirect, HttpResponse
 
-__author__="spawnedc"
-__date__ ="$Oct 17, 2011 9:15:32 PM$"
-
-if __name__ == "__main__":
-    print "Hello World"
+def home(request):
+    """ basic homepage view """
+    template_vars = {}
+    template_vars['test'] = 'test'
+    return render_to_response("home.html", template_vars, RequestContext(request))

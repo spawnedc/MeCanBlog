@@ -1,1 +1,13 @@
-/.gaedata/
+*.pyc
+*~
+.gaedata/
+*.swp
+nbproject/
+.DS_Store
+TAGS
+less/
+*#
+.test
+.idea/
+.project
+.pydevproject
