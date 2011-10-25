@@ -2,14 +2,22 @@
 <html>
     <head>
         <title>{% block title %}{% endblock %} | MeCanBlog</title>
+        <link rel="stylesheet" href="/static/css/screen.css" type="text/css" media="screen, projection" />
+        <link rel="stylesheet" href="/static/css/print.css" type="text/css" media="print" />
+        <!--[if IE]>
+        <link rel="stylesheet" href="/static/css/ie.css" type="text/css" media="screen, projection" />
+        <![endif]-->
+        <link rel="stylesheet" href="/static/css/style.css" type="text/css" media="screen, projection" />
     </head>
     <body>
-        <div id="header"></div>
+        <div class="container">
+            <div id="header"></div>
 
-        <div id="content">
-        {% block content %}{% endblock %}
+            <div id="content">
+            {% block content %}{% endblock %}
+            </div>
+
+            <div id="footer"></div>
         </div>
-
-        <div id="footer"></div>
     </body>
 </html>
