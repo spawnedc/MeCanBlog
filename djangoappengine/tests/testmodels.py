@@ -4,6 +4,7 @@ from djangotoolbox.fields import BlobField
 
 class EmailModel(models.Model):
     email = models.EmailField()
+    number = models.IntegerField(null=True)
 
 class DateTimeModel(models.Model):
     datetime = models.DateTimeField()
@@ -87,3 +88,6 @@ class DecimalModel(models.Model):
 
 class SelfReferenceModel(models.Model):
     ref = models.ForeignKey('self', null=True)
+
+class NullableTextModel(models.Model):
+    text = models.TextField(null=True)

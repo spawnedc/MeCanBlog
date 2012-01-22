@@ -1,9 +1,10 @@
+from datetime import date, time, datetime
 from django.conf import settings
 from django.db.models.fields import NOT_PROVIDED
 from django.db.models.sql import aggregates as sqlaggregates
 from django.db.models.sql.compiler import SQLCompiler
 from django.db.models.sql.constants import LOOKUP_SEP, MULTI, SINGLE
-from django.db.models.sql.where import AND, OR, Constraint
+from django.db.models.sql.where import AND, OR
 from django.db.utils import DatabaseError, IntegrityError
 from django.utils.tree import Node
 import random
@@ -164,7 +165,16 @@ class NonrelQuery(object):
                     else:
                         value = value[0]
 
-                submatch = EMULATED_OPS[lookup_type](entity[column], value)
+                if entity[column] is None:
+                    if isinstance(value, (datetime, date, time)):
+                        submatch = lookup_type in ('lt', 'lte')
+                    elif lookup_type in ('startswith', 'contains', 'endswith', 'iexact',
+                                         'istartswith', 'icontains', 'iendswith'):
+                        submatch = False
+                    else:
+                        submatch = EMULATED_OPS[lookup_type](entity[column], value)
+                else:
+                    submatch = EMULATED_OPS[lookup_type](entity[column], value)
 
             if filters.connector == OR and submatch:
                 result = True
@@ -178,16 +188,10 @@ class NonrelQuery(object):
         return result
 
     def _order_in_memory(self, lhs, rhs):
-        for order in self.compiler._get_ordering():
-            if LOOKUP_SEP in order:
-                raise DatabaseError("JOINs in ordering not supported (%s)" % order)
-            if order == '?':
-                result = random.choice([1, 0, -1])
-            else:
-                column = order.lstrip('-')
-                result = cmp(lhs.get(column), rhs.get(column))
-                if order.startswith('-'):
-                    result *= -1
+        for column, descending in self.compiler._get_ordering():
+            result = cmp(lhs.get(column), rhs.get(column))
+            if descending:
+                result *= -1
             if result != 0:
                 return result
         return 0
@@ -250,9 +254,10 @@ class NonrelCompiler(SQLCompiler):
             value = entity.get(field.column, NOT_PROVIDED)
             if value is NOT_PROVIDED:
                 value = field.get_default()
+            else:
+                value = self.convert_value_from_db(field.db_type(connection=self.connection), value)
             if value is None and not field.null:
-                raise DatabaseError("Non-nullable field %s can't be None!" % field.name)
-            value = self.convert_value_from_db(field.db_type(connection=self.connection), value)
+                raise IntegrityError("Non-nullable field %s can't be None!" % field.name)
             result.append(value)
         return result
 
@@ -318,33 +323,24 @@ class NonrelCompiler(SQLCompiler):
         return fields
 
     def _get_ordering(self):
+        opts = self.query.get_meta()
         if not self.query.default_ordering:
             ordering = self.query.order_by
         else:
-            ordering = self.query.order_by or self.query.get_meta().ordering
-        result = []
+            ordering = self.query.order_by or opts.ordering
         for order in ordering:
             if LOOKUP_SEP in order:
                 raise DatabaseError("Ordering can't span tables on non-relational backends (%s)" % order)
             if order == '?':
                 raise DatabaseError("Randomized ordering isn't supported by the backend")
-
             order = order.lstrip('+')
-
             descending = order.startswith('-')
-            name = order.lstrip('-')
-            if name == 'pk':
-                name = self.query.get_meta().pk.name
-                order = '-' + name if descending else name
-
-            if self.query.standard_ordering:
-                result.append(order)
-            else:
-                if descending:
-                    result.append(name)
-                else:
-                    result.append('-' + name)
-        return result
+            field = order.lstrip('-')
+            if field == 'pk':
+                field = opts.pk.name
+            if not self.query.standard_ordering:
+                descending = not descending
+            yield (opts.get_field(field).column, descending)
 
 class NonrelInsertCompiler(object):
     def execute_sql(self, return_id=False):
@@ -352,17 +348,40 @@ class NonrelInsertCompiler(object):
         for (field, value), column in zip(self.query.values, self.query.columns):
             if field is not None:
                 if not field.null and value is None:
-                    raise DatabaseError("You can't set %s (a non-nullable "
+                    raise IntegrityError("You can't set %s (a non-nullable "
                                         "field) to None!" % field.name)
                 db_type = field.db_type(connection=self.connection)
                 value = self.convert_value_for_db(db_type, value)
             data[column] = value
         return self.insert(data, return_id=return_id)
 
+    def insert(self, values, return_id):
+        """
+        :param values: The model object as a list of (column, value) pairs
+        :param return_id: Whether to return the id of the newly created entity
+        """
+        raise NotImplementedError
+
 class NonrelUpdateCompiler(object):
-    def execute_sql(self, result_type=MULTI):
-        # TODO: We don't yet support QuerySet.update() in Django-nonrel
-        raise NotImplementedError('No updates')
+    def execute_sql(self, result_type):
+        values = []
+        for field, _, value in self.query.values:
+            if hasattr(value, 'prepare_database_save'):
+                value = value.prepare_database_save(field)
+            else:
+                value = field.get_db_prep_save(value, connection=self.connection)
+            value = self.convert_value_for_db(
+                field.db_type(connection=self.connection),
+                value
+            )
+            values.append((field, value))
+        return self.update(values)
+
+    def update(self, values):
+        """
+        :param values: A list of (field, new-value) pairs
+        """
+        raise NotImplementedError
 
 class NonrelDeleteCompiler(object):
     def execute_sql(self, result_type=MULTI):

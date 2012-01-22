@@ -1,10 +1,14 @@
 from ..utils import appid, have_appserver
+from ..boot import PROJECT_DIR
 from google.appengine.ext.testbed import Testbed
 from urllib2 import HTTPError, URLError
 import logging
 import time
 
-REMOTE_API_SCRIPT = '$PYTHON_LIB/google/appengine/ext/remote_api/handler.py'
+REMOTE_API_SCRIPTS = (
+    '$PYTHON_LIB/google/appengine/ext/remote_api/handler.py',
+    'google.appengine.ext.remote_api.handler.application',
+)
 
 def auth_func():
     import getpass
@@ -35,7 +39,7 @@ class StubManager(object):
         self.active_stubs = 'test'
         self.testbed.init_datastore_v3_stub()
         self.testbed.init_memcache_stub()
-        self.testbed.init_taskqueue_stub()
+        self.testbed.init_taskqueue_stub(root_path=PROJECT_DIR)
         self.testbed.init_urlfetch_stub()
         self.testbed.init_user_stub()
         self.testbed.init_xmpp_stub()
@@ -53,10 +57,11 @@ class StubManager(object):
         from google.appengine.tools import dev_appserver_main
         args = dev_appserver_main.DEFAULT_ARGS.copy()
         args.update(get_datastore_paths(connection.settings_dict))
+        args.update(connection.settings_dict.get('DEV_APPSERVER_OPTIONS', {}))
         log_level = logging.getLogger().getEffectiveLevel()
         logging.getLogger().setLevel(logging.WARNING)
         from google.appengine.tools import dev_appserver
-        dev_appserver.SetupStubs(appid, **args)
+        dev_appserver.SetupStubs('dev~' + appid, **args)
         logging.getLogger().setLevel(log_level)
         self.active_stubs = 'local'
 
@@ -66,7 +71,7 @@ class StubManager(object):
         if not connection.remote_api_path:
             from ..utils import appconfig
             for handler in appconfig.handlers:
-                if handler.script == REMOTE_API_SCRIPT:
+                if handler.script in REMOTE_API_SCRIPTS:
                     connection.remote_api_path = handler.url.split('(', 1)[0]
                     break
         server = '%s.%s' % (connection.remote_app_id, connection.domain)

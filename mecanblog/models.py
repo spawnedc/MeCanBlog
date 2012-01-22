@@ -25,7 +25,7 @@ class BlogCategoryForm(forms.ModelForm):
 class BlogPost(ModelBase):
     title = models.CharField(max_length=100)
     content = models.TextField(blank=True)
-    url_slug = models.TextField(max_length=100, blank=True)
+    url_slug = models.CharField(max_length=100, blank=True)
     category = models.ForeignKey(BlogCategory)
     user = models.ForeignKey(User)
     
@@ -33,6 +33,7 @@ class BlogPost(ModelBase):
 class BlogPostForm(forms.ModelForm):
     class Meta:
         model = BlogPost
+        exclude = ['url_slug']
         
     def __init__(self, *args, **kwargs):
         super(BlogPostForm, self).__init__(*args, **kwargs)

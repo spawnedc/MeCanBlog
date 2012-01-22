@@ -11,11 +11,12 @@ from google.appengine.api.datastore import Query, Delete
 from google.appengine.api.namespace_manager import set_namespace
 import logging
 import os
+import shutil
 
 DATASTORE_PATHS = {
     'datastore_path': os.path.join(DATA_ROOT, 'datastore'),
     'blobstore_path': os.path.join(DATA_ROOT, 'blobstore'),
-    'rdbms_sqlite_path': os.path.join(DATA_ROOT, 'rdbms'),
+    #'rdbms_sqlite_path': os.path.join(DATA_ROOT, 'rdbms'),
     'prospective_search_path': os.path.join(DATA_ROOT, 'prospective-search'),
 }
 
@@ -31,7 +32,10 @@ def destroy_datastore(paths):
         if not path:
             continue
         try:
-            os.remove(path)
+            if os.path.isdir(path):
+                shutil.rmtree(path)
+            else:
+                os.remove(path)
         except OSError, error:
             if error.errno != 2:
                 logging.error("Failed to clear datastore: %s" % error)
@@ -48,10 +52,14 @@ class DatabaseOperations(NonrelDatabaseOperations):
     def value_to_db_decimal(self, value, max_digits, decimal_places):
         if value is None:
             return None
-        sign = value < 0 and u'-' or u''
-        if sign: 
+
+        if value.is_signed():
+            sign = u'-'
             value = abs(value)
-        if max_digits is None: 
+        else:
+            sign = u''
+
+        if max_digits is None:
             max_digits = self.DEFAULT_MAX_DIGITS
 
         if decimal_places is None:
@@ -126,15 +134,13 @@ class DatabaseWrapper(NonrelDatabaseWrapper):
                 delete_all_entities()
                 print "Datastore flushed! Please check your dashboard's " \
                       'datastore viewer for any remaining entities and remove ' \
-                      'all unneeded indexes with manage.py vacuum_indexes.'
+                      'all unneeded indexes with appcfg.py vacuum_indexes.'
             else:
                 print 'Aborting'
                 exit()
         elif stub_manager.active_stubs == 'test':
             stub_manager.deactivate_test_stubs()
             stub_manager.activate_test_stubs()
-#        elif on_production_server or have_appserver:
-#            delete_all_entities()
         else:
             destroy_datastore(get_datastore_paths(self.settings_dict))
             stub_manager.setup_local_stubs(self)
