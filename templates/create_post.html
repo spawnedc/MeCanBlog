@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="form">
+	<form action="" method="post">
+	{{ form.as_p }}
+	<button type="submit">Submit</button>
+	</form>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script type="text/javascript" src="/static/js/tiny_mce/tiny_mce.js"></script>
+<script type="text/javascript" src="/static/js/tiny_mce/jquery.tinymce.js"></script>
+<script type="text/javascript" src="/static/js/mcb.tinymce.js"></script>
+{% endblock %}

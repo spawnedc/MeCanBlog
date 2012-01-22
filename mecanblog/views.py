@@ -1,42 +1,34 @@
-from django.template import RequestContext
-from django.http import HttpResponseRedirect, HttpResponse
 import models
-import logging
-from django.shortcuts import render_to_response
+from django.views.generic.base import TemplateView
+from django.views.generic.list import BaseListView
+from django.views.generic.detail import BaseDetailView
+from django.views.generic.edit import BaseCreateView
 
-def home(request):
-    """ basic homepage view """
-    template_vars = {}
-    template_vars['test'] = 'test'
+class HomeView(BaseListView, TemplateView):
+    template_name = "home.html"
+    context_object_name = 'posts'
+    model = models.BlogPost
 
-    if request.POST.get('add_post'):
-        blog_post_form = models.BlogPostForm(request.POST)
-        if blog_post_form.is_valid():
-            blog_post_form.save()
-            return HttpResponseRedirect('/');
-    else:
-        blog_post_form = models.BlogPostForm()
-
-    if request.POST.get('add_user'):
-        user_form = models.UserForm(request.POST)
-        if user_form.is_valid():
-            user_form.save()
-            return HttpResponseRedirect('/');
-    else:
-        user_form = models.UserForm()
-
-    if request.POST.get('add_category'):
-        category_form = models.BlogCategoryForm(request.POST)
-        if category_form.is_valid():
-            category_form.save()
-            return HttpResponseRedirect('/');
-    else:
-        category_form = models.BlogCategoryForm()
-
-    template_vars['blog_post_form'] = blog_post_form
-    template_vars['user_form'] = user_form
-    template_vars['category_form'] = category_form
+home_view = HomeView.as_view()
 
 
-    template_vars['posts'] = models.BlogPost.objects.all()
-    return render_to_response("home.html", template_vars, RequestContext(request))
+class NewPostView(BaseCreateView, TemplateView):
+    template_name = "create_post.html"
+    form_class = models.BlogPostForm
+    success_url = '/'
+
+    def form_valid(self, *args, **kwargs):
+        return super(NewPostView, self).form_valid(*args, **kwargs);
+
+    def form_invalid(self, *args, **kwargs):
+        return super(NewPostView, self).form_invalid(*args, **kwargs);
+
+new_post_view = NewPostView.as_view()
+
+
+class ReadPostView(BaseDetailView, TemplateView):
+    template_name = "read_post.html"
+    context_object_name = "post"
+    model = models.BlogPost
+
+read_post_view = ReadPostView.as_view()

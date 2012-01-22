@@ -1,16 +1,16 @@
 /*************************************
-       WELCOME TO THE STYLESHEET
+	   WELCOME TO THE STYLESHEET
 --------------------------------------
-              screen.css
-        BlueTrip CSS Framework
-         http://bluetrip.org
+			  screen.css
+		BlueTrip CSS Framework
+		 http://bluetrip.org
 ***************************************/
 
 /*** MEYER RESET v1.0 ***/
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outline:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 /*** BASIC TYPOGRAPHY ***/
-html { font-size: 62.5%; font-family: "Liberation Sans", Helvetica, Arial, sans-serif; }
+html { font-size: 62.5%; font-family: "Ruluko", Helvetica, Arial, sans-serif; }
 strong, th, thead td, h1, h2, h3, h4, h5, h6 { font-weight: bold; }
 cite, em, dfn { font-style: italic; }
 code, kbd, samp, pre, tt, var, input[type='text'], input[type='password'], textarea { font-size: 92%; font-family: monaco, "Lucida Console", courier, monospace; }
@@ -285,21 +285,21 @@ a[href^="http://yourwebsite.com"] { background:none; padding:0; margin:0; }
 
 /*** STYLES FOR BUTTONS ***/
 a.button, button {
-  display: inline-block;
-  float: left;
-  margin:0 0.583em 0.667em 0;
-  padding:5px 10px 5px 7px;   /*** Links ***/
-  border:1px solid #dedede;
-  border-top:1px solid #eee;
-  border-left:1px solid #eee;
-  background-color:#f5f5f5;
-  font-family:"Liberation Sans", Helvetica, Arial, sans-serif;
-  font-size:100%;
-  line-height:130%;
-  text-decoration:none;
-  font-weight:bold;
-  color:#565656;
-  cursor:pointer;
+display: inline-block;
+float: left;
+margin:0 0.583em 0.667em 0;
+padding:5px 10px 5px 7px;   /*** Links ***/
+border:1px solid #dedede;
+border-top:1px solid #eee;
+border-left:1px solid #eee;
+background-color:#f5f5f5;
+font-family:"Liberation Sans", Helvetica, Arial, sans-serif;
+font-size:100%;
+line-height:130%;
+text-decoration:none;
+font-weight:bold;
+color:#565656;
+cursor:pointer;
 }
 button { width:auto; overflow:visible; padding:4px 10px 3px 7px; }
 button[type] { padding:4px 10px 4px 7px; line-height:17px; }

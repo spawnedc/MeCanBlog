@@ -1,20 +1,8 @@
 {% extends 'base.html' %}
-{% block title %}It works!{% endblock %}
+{% block title %}Home{% endblock %}
 
 {% block content %}
-    {% for post in posts %}
-    {{ post.title }}
-    {% endfor %}
-    <form method="POST">
-        {{ blog_post_form.as_p }}
-        <input name="add_post" type="submit" />
-    </form>
-    <form method="POST">
-        {{ user_form.as_p }}
-        <input name="add_user" type="submit" />
-    </form>
-    <form method="POST">
-        {{ category_form.as_p }}
-        <input name="add_category" type="submit" />
-    </form>
+	{% for post in posts %}
+	<p><a href="{% url read_post_view slug=post.slug %}">{{ post.title }}</a></p>
+	{% endfor %}
 {% endblock %}

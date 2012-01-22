@@ -1,23 +1,31 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>{% block title %}{% endblock %} | MeCanBlog</title>
-        <link rel="stylesheet" href="/static/css/screen.css" type="text/css" media="screen, projection" />
-        <link rel="stylesheet" href="/static/css/print.css" type="text/css" media="print" />
-        <!--[if IE]>
-        <link rel="stylesheet" href="/static/css/ie.css" type="text/css" media="screen, projection" />
-        <![endif]-->
-        <link rel="stylesheet" href="/static/css/style.css" type="text/css" media="screen, projection" />
-    </head>
-    <body>
-        <div class="container">
-            <div id="header"></div>
+	<head>
+		<title>{% block title %}{% endblock %} | MeCanBlog</title>
+		<link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Ruluko" media="all" />
+		<link rel="stylesheet" type="text/css" href="/static/css/style.css" media="all" />
+	</head>
+	<body>
+		<header class="container">
+			<h1 class="text-shadow">MeCanBlog</h1>
+		</header>
 
-            <div id="content">
-            {% block content %}{% endblock %}
-            </div>
+		<nav class="container">
+			<a href="{% url home_view %}">HOME</a>
+			<a href="{% url new_post_view %}">WRITE NEW POST</a>
+			<a href="{% url home_view %}">NEW CATEGORY</a>
+		</nav>
 
-            <div id="footer"></div>
-        </div>
-    </body>
+		<div id="maincontent" class="container rounded box-shadow">
+			<section>
+
+				{% block content %}{% endblock %}
+
+			</section>
+		</div>
+		<footer></footer>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+		<script type="text/javascript" src="/static/js/mcb.js"></script>
+		{% block extrajs %}{% endblock %}
+	</body>
 </html>
