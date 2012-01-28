@@ -11,3 +11,4 @@ less/
 .idea/
 .project
 .pydevproject
+.pyc
